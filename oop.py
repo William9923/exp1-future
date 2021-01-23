@@ -21,7 +21,7 @@ class LinearRegression(Supervised):
     '''
     def training(self):
         pass
-    def predict(self):
+    def predict(self, model):
         pass
 
 

@@ -157,7 +157,7 @@ class PipelineSupervied():
         self.file = file
 
     # Load a CSV file
-    def load_data(self, file = 'insurance.csv'):
+    def load_data(self, file = ''):
         dataset = []
         with open(file, 'r') as csv_file:
           csv_reader = csv.reader(csv_file, delimiter=',')

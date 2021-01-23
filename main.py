@@ -1,30 +1,62 @@
 import csv
-from oop import LinearRegression
+from oop import LinearRegression, Normalization, SplitValidation, MSEMetric, PipelineSupervied
 import argparse
-from oop import Normalization, SplitValidation
 
 # Cara pakai python main.py -p "Normalization, dll" -v SplitValidation -d insurance.csv
 # Dari dion :D
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-p', dest='preprocessing', action='store', type=str)
-parser.add_argument('-v', dest='validation', action='store', type=str)
-parser.add_argument('-d', dest='data', action='store', type=str)
+def factory_method(method):
+  return {
+    'linear' : LinearRegression()
+  }.get(method)
 
-args = parser.parse_args()
-preprocessing = [ eval(preprocessor) for preprocessor in args.preprocessing.split(", ") ]
-validation = eval(args.validation)
-data = args.data
+def factory_preprocessor(preprocessor):
+  return {
+    'normalization' : Normalization()
+  }.get(preprocessor)
+
+def factory_validation(validation, metric):
+  return {
+    'split_validation' : SplitValidation(metric)
+  }.get(validation)
 
 if __name__ == '__main__':
-  dataset = load_data()
+
+  # Argument Parser
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-m', dest='method', action='store', type=str)
+  parser.add_argument('-p', dest='preprocessing', action='store', type=str)
+  parser.add_argument('-v', dest='validation', action='store', type=str)
+  parser.add_argument('-d', dest='data', action='store', type=str)
+
+  args = parser.parse_args()
+
+  method = factory_method(args.method)
+  preprocessing = [ factory_preprocessor(preprocessor) for preprocessor in args.preprocessing.split(", ") ]
+  validation = factory_validation(args.validation, MSEMetric())
   
-  linear_regression = LinearRegression()
+  data = args.data.strip()
 
-  linear_regression.training(dataset)
+  # method = eval(args.method)
+  # preprocessing = [ eval(preprocessor) for preprocessor in args.preprocessing.split(", ") ]
+  # validation = eval(args.validation)
+  # data = args.data
+  
+  pipe = PipelineSupervied(data, preprocessing, method, validation)
 
-  print(linear_regression.b0, linear_regression.b1)
+  # print(preprocessing)
+  # print(validation)
 
-  print(linear_regression.predict([10, 19, 123, 19]))
+  model = pipe.run()
+
+  print(model.b0, model.b1)
+
+  # linear_regression = LinearRegression()
+
+  # linear_regression.training(dataset)
+
+  # print(linear_regression.b0, linear_regression.b1)
+
+  # print(linear_regression.predict([10, 19, 123, 19]))
 
   # python3 main.py -v split_val -d data.csv
